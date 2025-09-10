@@ -2,7 +2,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import React from 'react';
 import { Container, Tabs, Tab, Box, Typography } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import AdvancedDataGrid from '../../components/AdvancedDataGrid';
+import { GridColDef } from '@mui/x-data-grid';
 import Comments from '../../components/Comments';
 
 interface Student {
@@ -10,18 +11,48 @@ interface Student {
   name: string;
   license: string;
   certification: string;
+  crmTags: string[];
+  tagged: boolean; // computed metric
+  instructor: string;
 }
 
 const mockStudents: Student[] = [
-  { id: 1, name: 'Alice Johnson', license: 'ABC123', certification: 'Graston Level 1' },
-  { id: 2, name: 'Bob Smith', license: 'XYZ789', certification: 'Graston Level 2' },
-  { id: 3, name: 'Carol Lee', license: 'DEF456', certification: 'Graston Level 1' },
+  { id: 1, name: 'Alice Johnson', license: 'ABC123', certification: 'Graston Level 1', crmTags: ['Alumni'], tagged: true, instructor: 'Instructor A' },
+  { id: 2, name: 'Bob Smith', license: 'XYZ789', certification: 'Graston Level 2', crmTags: ['Prospect', 'VIP'], tagged: true, instructor: 'Instructor B' },
+  { id: 3, name: 'Carol Lee', license: 'DEF456', certification: 'Graston Level 1', crmTags: [], tagged: false, instructor: 'Instructor C' },
 ];
 
 const columns: GridColDef[] = [
   { field: 'name', headerName: 'Name', flex: 1 },
   { field: 'license', headerName: 'License', flex: 1 },
   { field: 'certification', headerName: 'Certification', flex: 1 },
+  {
+    field: 'crmTags',
+    headerName: 'CRM Tags',
+    width: 180,
+    renderCell: (params) =>
+      params.value && Array.isArray(params.value) ? (
+        params.value.map((tag: string) => (
+          <Chip key={tag} label={tag} size="small" sx={{ mr: 0.5 }} />
+        ))
+      ) : null,
+  },
+  {
+    field: 'tagged',
+    headerName: 'Tagged?',
+    width: 100,
+    renderCell: (params) =>
+      params.value ? (
+        <Chip label="Yes" color="success" size="small" />
+      ) : (
+        <Chip label="No" color="default" size="small" />
+      ),
+  },
+  {
+    field: 'instructor',
+    headerName: 'Instructor',
+    width: 140,
+  },
 ];
 
 export default function EventDetail() {
@@ -55,8 +86,12 @@ export default function EventDetail() {
       )}
 
       {tabIndex === 1 && (
-        <Box sx={{ mt: 2, height: 400 }}>
-          <DataGrid rows={mockStudents} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
+        <Box sx={{ mt: 2 }}>
+          <AdvancedDataGrid
+            title="Roster"
+            columns={columns}
+            rows={mockStudents}
+          />
         </Box>
       )}
 
